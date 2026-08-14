@@ -1,0 +1,32 @@
+# Virtual environment
+myenv/
+myvenv/
+venv/
+.env/
+.venv/
+myenv/
+# Environment variables / API keys
+.env
+.env.*
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# FAISS / vector database files
+*.faiss
+*.pkl
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
