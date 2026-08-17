@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>RAG AI | Knowledge Assistant</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ========================================= -->
+    <!-- SIDEBAR -->
+    <!-- ========================================= -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-logo">R</div>
+
+            <div>
+                <h2>RAG AI</h2>
+                <span>Knowledge Assistant</span>
+            </div>
+        </div>
+
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+
+            <div>
+                <strong>System Online</strong>
+                <small>Ready to answer</small>
+            </div>
+        </div>
+
+
+        <nav class="navigation">
+
+            <p class="nav-title">WORKSPACE</p>
+
+            <button class="nav-item active" onclick="showSection('chat')">
+                <span>✦</span>
+                Chat
+            </button>
+
+            <button class="nav-item" onclick="showSection('documents')">
+                <span>▣</span>
+                Documents
+            </button>
+
+            <button class="nav-item" onclick="showSection('upload')">
+                <span>↑</span>
+                Upload
+            </button>
+
+        </nav>
+
+
+        <div class="capabilities">
+
+            <p class="nav-title">CAPABILITIES</p>
+
+            <div class="capability">
+                <div class="cap-icon">◇</div>
+
+                <div>
+                    <strong>Document Search</strong>
+                    <small>FAISS Retrieval</small>
+                </div>
+            </div>
+
+
+            <div class="capability">
+                <div class="cap-icon">✦</div>
+
+                <div>
+                    <strong>AI Responses</strong>
+                    <small>Powered by Groq</small>
+                </div>
+            </div>
+
+
+            <div class="capability">
+                <div class="cap-icon">⌁</div>
+
+                <div>
+                    <strong>Semantic Search</strong>
+                    <small>HuggingFace Embeddings</small>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="sidebar-footer">
+
+            <div class="tech-stack">
+                <span>LangChain</span>
+                <span>FAISS</span>
+                <span>Groq</span>
+                <span>Python</span>
+            </div>
+
+            <small>RAG-ML-CHATBOT</small>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ========================================= -->
+    <!-- MAIN -->
+    <!-- ========================================= -->
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <div>
+                <span class="page-label">AI KNOWLEDGE WORKSPACE</span>
+            </div>
+
+            <button class="refresh-btn"
+                    onclick="location.reload()">
+                ↻
+            </button>
+
+        </header>
+
+
+        <!-- ===================================== -->
+        <!-- CHAT SECTION -->
+        <!-- ===================================== -->
+
+        <section id="chatSection" class="section chat-section">
+
+            <div class="hero">
+
+                <div class="hero-icon">
+                    ✦
+                </div>
+
+                <span class="eyebrow">
+                    AI KNOWLEDGE ASSISTANT
+                </span>
+
+                <h1>
+                    Ask your documents
+                    <span>anything.</span>
+                </h1>
+
+                <p>
+                    Upload your knowledge base and ask questions.
+                    RAG AI retrieves relevant information before
+                    generating an answer.
+                </p>
+
+            </div>
+
+
+            <!-- DOCUMENT STATUS -->
+
+            <div class="document-status">
+
+                <div>
+                    <span class="status-dot"></span>
+
+                    <div>
+                        <strong id="documentStatus">
+                            Ready
+                        </strong>
+
+                        <small id="documentStatusText">
+                            Upload a document to begin
+                        </small>
+                    </div>
+                </div>
+
+                <button onclick="showSection('upload')">
+                    + Add document
+                </button>
+
+            </div>
+
+
+            <!-- SUGGESTIONS -->
+
+            <div class="suggestions">
+
+                <button onclick="askSuggestion('What is MLOps?')">
+                    <strong>What is MLOps?</strong>
+                    <small>Explain the concept</small>
+                </button>
+
+                <button onclick="askSuggestion('Summarize the document')">
+                    <strong>Summarize document</strong>
+                    <small>Give me the key points</small>
+                </button>
+
+                <button onclick="askSuggestion('What are the main topics?')">
+                    <strong>Main topics</strong>
+                    <small>Identify important concepts</small>
+                </button>
+
+            </div>
+
+
+            <!-- CHAT -->
+
+            <div class="chat-container">
+
+                <div id="messages" class="messages">
+
+                    <div class="empty-chat">
+
+                        <div class="empty-icon">
+                            ✦
+                        </div>
+
+                        <h3>
+                            Your AI knowledge assistant
+                        </h3>
+
+                        <p>
+                            Upload a PDF and start asking questions
+                            about your documents.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <form id="chatForm" class="chat-input">
+
+                    <input
+                        type="text"
+                        id="messageInput"
+                        name="msg"
+                        placeholder="Ask something about your documents..."
+                        autocomplete="off"
+                        maxlength="1000"
+                    >
+
+                    <button type="submit" id="sendButton">
+                        ➤
+                    </button>
+
+                </form>
+
+                <div class="input-footer">
+                    <span>AI can make mistakes. Verify important information.</span>
+                    <span id="counter">0 / 1000</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ===================================== -->
+        <!-- DOCUMENTS SECTION -->
+        <!-- ===================================== -->
+
+        <section id="documentsSection"
+                 class="section hidden">
+
+            <div class="section-header">
+
+                <div>
+                    <span class="eyebrow">KNOWLEDGE BASE</span>
+
+                    <h2>Your Documents</h2>
+
+                    <p>
+                        Documents indexed into your RAG knowledge base.
+                    </p>
+                </div>
+
+                <button class="primary-button"
+                        onclick="showSection('upload')">
+                    + Upload document
+                </button>
+
+            </div>
+
+
+            <div id="documentList"
+                 class="document-list">
+
+                <div class="empty-documents">
+
+                    <div>📄</div>
+
+                    <h3>No documents yet</h3>
+
+                    <p>
+                        Upload your first PDF to build your knowledge base.
+                    </p>
+
+                    <button class="primary-button"
+                            onclick="showSection('upload')">
+                        Upload PDF
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ===================================== -->
+        <!-- UPLOAD SECTION -->
+        <!-- ===================================== -->
+
+        <section id="uploadSection"
+                 class="section hidden">
+
+            <div class="section-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        KNOWLEDGE INGESTION
+                    </span>
+
+                    <h2>Upload Documents</h2>
+
+                    <p>
+                        Add PDF documents to your private RAG knowledge base.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div id="dropZone"
+                 class="upload-zone">
+
+                <div class="upload-icon">
+                    ↑
+                </div>
+
+                <h3>
+                    Drop your PDF here
+                </h3>
+
+                <p>
+                    or choose a file from your computer
+                </p>
+
+                <label class="browse-button">
+
+                    Browse files
+
+                    <input
+                        type="file"
+                        id="fileInput"
+                        accept=".pdf,application/pdf"
+                        hidden
+                    >
+
+                </label>
+
+                <small>
+                    PDF files only
+                </small>
+
+            </div>
+
+
+            <!-- UPLOAD PROGRESS -->
+
+            <div id="uploadProgress"
+                 class="upload-progress hidden">
+
+                <div class="upload-file">
+
+                    <div class="file-icon">
+                        PDF
+                    </div>
+
+                    <div class="file-info">
+
+                        <strong id="uploadFileName">
+                            Document.pdf
+                        </strong>
+
+                        <span id="uploadStatus">
+                            Processing...
+                        </span>
+
+                    </div>
+
+                    <div id="uploadCheck"
+                         class="upload-check">
+                        ⟳
+                    </div>
+
+                </div>
+
+
+                <div class="progress-track">
+
+                    <div id="progressBar"
+                         class="progress-bar">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div id="uploadResult"
+                 class="upload-result hidden">
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================================= -->
+
+<script>
+
+const chatSection = document.getElementById("chatSection");
+const documentsSection = document.getElementById("documentsSection");
+const uploadSection = document.getElementById("uploadSection");
+
+const fileInput = document.getElementById("fileInput");
+const dropZone = document.getElementById("dropZone");
+
+const uploadProgress =
+    document.getElementById("uploadProgress");
+
+const uploadResult =
+    document.getElementById("uploadResult");
+
+const messages =
+    document.getElementById("messages");
+
+const messageInput =
+    document.getElementById("messageInput");
+
+const counter =
+    document.getElementById("counter");
+
+const chatForm =
+    document.getElementById("chatForm");
+
+
+/* =========================================
+   SECTION NAVIGATION
+========================================= */
+
+function showSection(section) {
+
+    chatSection.classList.add("hidden");
+    documentsSection.classList.add("hidden");
+    uploadSection.classList.add("hidden");
+
+    if (section === "chat") {
+        chatSection.classList.remove("hidden");
+    }
+
+    if (section === "documents") {
+        documentsSection.classList.remove("hidden");
+    }
+
+    if (section === "upload") {
+        uploadSection.classList.remove("hidden");
+    }
+
+}
+
+
+/* =========================================
+   FILE SELECTION
+========================================= */
+
+fileInput.addEventListener("change", function () {
+
+    if (this.files.length > 0) {
+        uploadFile(this.files[0]);
+    }
+
+});
+
+
+/* =========================================
+   DRAG & DROP
+========================================= */
+
+dropZone.addEventListener("dragover", function(e) {
+
+    e.preventDefault();
+
+    dropZone.classList.add("dragging");
+
+});
+
+
+dropZone.addEventListener("dragleave", function() {
+
+    dropZone.classList.remove("dragging");
+
+});
+
+
+dropZone.addEventListener("drop", function(e) {
+
+    e.preventDefault();
+
+    dropZone.classList.remove("dragging");
+
+    const files = e.dataTransfer.files;
+
+    if (files.length > 0) {
+        uploadFile(files[0]);
+    }
+
+});
+
+
+/* =========================================
+   UPLOAD DOCUMENT
+========================================= */
+
+async function uploadFile(file) {
+
+    if (!file.name.toLowerCase().endsWith(".pdf")) {
+
+        showUploadError(
+            "Only PDF files are supported."
+        );
+
+        return;
+    }
+
+
+    uploadProgress.classList.remove("hidden");
+
+    uploadResult.classList.add("hidden");
+
+    document.getElementById("uploadFileName")
+        .textContent = file.name;
+
+    document.getElementById("uploadStatus")
+        .textContent = "Uploading and indexing...";
+
+    document.getElementById("progressBar")
+        .style.width = "30%";
+
+
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+
+    try {
+
+        const response = await fetch(
+            "/api/documents/upload",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+
+        document.getElementById("progressBar")
+            .style.width = "80%";
+
+
+        const data = await response.json();
+
+
+        if (!data.success) {
+
+            throw new Error(
+                data.error || "Upload failed"
+            );
+
+        }
+
+
+        document.getElementById("progressBar")
+            .style.width = "100%";
+
+
+        document.getElementById("uploadStatus")
+            .textContent =
+            `${data.chunks} chunks indexed`;
+
+
+        document.getElementById("uploadCheck")
+            .textContent = "✓";
+
+
+        showUploadSuccess(
+            `${file.name} indexed successfully.`
+        );
+
+
+        document.getElementById("documentStatus")
+            .textContent = "Knowledge base ready";
+
+
+        document.getElementById("documentStatusText")
+            .textContent =
+            `${file.name} is available for questions`;
+
+
+        addDocumentToList(
+            file.name,
+            data.chunks
+        );
+
+
+    } catch (error) {
+
+        document.getElementById("uploadCheck")
+            .textContent = "×";
+
+
+        showUploadError(
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   UPLOAD MESSAGES
+========================================= */
+
+function showUploadSuccess(message) {
+
+    uploadResult.className =
+        "upload-result success";
+
+    uploadResult.textContent =
+        "✓ " + message;
+
+    uploadResult.classList.remove("hidden");
+
+}
+
+
+function showUploadError(message) {
+
+    uploadResult.className =
+        "upload-result error";
+
+    uploadResult.textContent =
+        "✕ " + message;
+
+    uploadResult.classList.remove("hidden");
+
+}
+
+
+/* =========================================
+   DOCUMENT LIST
+========================================= */
+
+function addDocumentToList(filename, chunks) {
+
+    const list =
+        document.getElementById("documentList");
+
+
+    const empty =
+        list.querySelector(".empty-documents");
+
+    if (empty) {
+        empty.remove();
+    }
+
+
+    const item =
+        document.createElement("div");
+
+    item.className = "document-card";
+
+
+    item.innerHTML = `
+
+        <div class="file-icon">
+            PDF
+        </div>
+
+        <div class="document-info">
+
+            <strong>${escapeHtml(filename)}</strong>
+
+            <span>
+                ${chunks} chunks · Indexed
+            </span>
+
+        </div>
+
+        <div class="document-status-badge">
+            ✓ Ready
+        </div>
+
+    `;
+
+
+    list.prepend(item);
+
+}
+
+
+/* =========================================
+   CHAT
+========================================= */
+
+chatForm.addEventListener(
+    "submit",
+    async function(e) {
+
+        e.preventDefault();
+
+
+        const message =
+            messageInput.value.trim();
+
+
+        if (!message) {
+            return;
+        }
+
+
+        addMessage(
+            message,
+            "user"
+        );
+
+
+        messageInput.value = "";
+
+        updateCounter();
+
+
+        const loading =
+            addMessage(
+                "Thinking...",
+                "assistant loading"
+            );
+
+
+        try {
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                "msg",
+                message
+            );
+
+
+            const response =
+                await fetch(
+                    "/get",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+
+            const text =
+                await response.text();
+
+
+            loading.remove();
+
+
+            if (!response.ok) {
+
+                let errorMessage =
+                    "Something went wrong.";
+
+                try {
+
+                    const error =
+                        JSON.parse(text);
+
+                    errorMessage =
+                        error.error ||
+                        errorMessage;
+
+                } catch {}
+
+                addMessage(
+                    errorMessage,
+                    "assistant error"
+                );
+
+                return;
+            }
+
+
+            addMessage(
+                text,
+                "assistant"
+            );
+
+
+        } catch (error) {
+
+            loading.remove();
+
+            addMessage(
+                "Unable to connect to the server.",
+                "assistant error"
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================
+   ADD CHAT MESSAGE
+========================================= */
+
+function addMessage(text, type) {
+
+    const empty =
+        messages.querySelector(".empty-chat");
+
+    if (empty) {
+        empty.remove();
+    }
+
+
+    const message =
+        document.createElement("div");
+
+    message.className =
+        `message ${type}`;
+
+
+    message.innerHTML = `
+        <div class="message-content">
+            ${escapeHtml(text)}
+        </div>
+    `;
+
+
+    messages.appendChild(message);
+
+
+    messages.scrollTop =
+        messages.scrollHeight;
+
+
+    return message;
+
+}
+
+
+/* =========================================
+   SUGGESTIONS
+========================================= */
+
+function askSuggestion(question) {
+
+    messageInput.value =
+        question;
+
+    messageInput.focus();
+
+}
+
+
+/* =========================================
+   CHARACTER COUNTER
+========================================= */
+
+messageInput.addEventListener(
+    "input",
+    updateCounter
+);
+
+
+function updateCounter() {
+
+    counter.textContent =
+        `${messageInput.value.length} / 1000`;
+
+}
+
+
+/* =========================================
+   HTML ESCAPE
+========================================= */
+
+function escapeHtml(text) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+
+}
+
+</script>
+
+</body>
+</html>

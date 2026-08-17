@@ -7,6 +7,14 @@ venv/
 myenv/
 # Environment variables / API keys
 .env
+
+.env
+myenv/
+__pycache__/
+*.pyc
+data/uploads/
+vectorstore/
+
 .env.*
 
 # Python cache
